@@ -65,6 +65,7 @@ function move(rover: Rover, plateau: Plateau): Rover {
   return { ...rover, position: { x, y } };
 }
 
+/** Returns true if the position falls within the plateau, false otherwise */
 export function isValidPosition(position: Position, plateau: Plateau) {
   const wouldRoverBeOutOfBounds =
     position.x < 0 ||
@@ -92,6 +93,10 @@ function processCommand(
   }
 }
 
+/**
+ * Processes a series of commands in the form "M" | "L" | "R", for example "MLMMRRMMMLRRM"
+ * Will throw an error if an invalid command is found
+ */
 export function runCommands(
   rover: Rover,
   commands: string,
@@ -105,16 +110,10 @@ export function runCommands(
 }
 
 function main() {
-  const lines = fs
-    .readFileSync("input", "utf-8")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
-
-  console.log(lines);
-
   // For now we will just assume the file is formatted correctly.
-  // In a real-world scenario, we would want to validate these inputs
+  // In a real-world scenario, we would want to validate these inputs and types.
+  const lines = fs.readFileSync("input", "utf-8").split("\n");
+
   const [maxX, maxY] = lines[0].split(" ").map(Number);
   const plateau: Plateau = { maxX, maxY };
 

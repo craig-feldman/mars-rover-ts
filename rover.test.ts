@@ -103,6 +103,13 @@ describe(`${runCommands.name} executes commands as expected`, () => {
     expect(result).toEqual(makeRover(2, 2, "E"));
   });
 
+  it("throws an error on invalid commands", () => {
+    const rover = makeRover(2, 2, "E");
+    expect(() => runCommands(rover, "MLZ", plateau)).toThrowError(
+      "Invalid command detected - 'Z'"
+    );
+  });
+
   it("should handle the first example rover", () => {
     const rover: Rover = { position: { x: 1, y: 2 }, direction: "N" };
     const result = runCommands(rover, "LMLMLMLMM", plateau);
