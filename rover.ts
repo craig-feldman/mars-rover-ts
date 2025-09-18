@@ -7,7 +7,7 @@ type Position = {
 
 export type Plateau = { maxX: number; maxY: number };
 
-type Direction = "N" | "E" | "S" | "W";
+export type Direction = "N" | "E" | "S" | "W";
 
 export type Rover = {
   position: Position;
