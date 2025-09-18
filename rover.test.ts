@@ -11,6 +11,24 @@ function makeRover(x: number, y: number, direction: Direction): Rover {
   return { position: { x, y }, direction };
 }
 
+// note - could also do table tests like these:
+// describe(`${isValidPosition.name} - correctly returns whether a position is valid`, () => {
+//   const plateau: Plateau = { maxX: 3, maxY: 5 };
+
+//   it.each([
+//     [{ x: 2, y: 2 }, true, "inside plateau"],
+//     [{ x: 0, y: 0 }, true, "at bottom-left edge"],
+//     [{ x: 3, y: 5 }, true, "at top-right edge"],
+//     [{ x: 0, y: 5 }, true, "at top-left edge"],
+//     [{ x: 3, y: 0 }, true, "at bottom-right edge"],
+//     [{ x: -1, y: 0 }, false, "negative x"],
+//     [{ x: 4, y: 5 }, false, "x beyond maxX"],
+//     [{ x: 3, y: 6 }, false, "y beyond maxY"],
+//   ])("returns %s for %s", (pos, expected, desc) => {
+//     expect(isValidPosition(pos, plateau), desc).toBe(expected);
+//   });
+// });
+
 describe(`${isValidPosition.name} correctly returns whether a position is valid`, () => {
   const plateau: Plateau = { maxX: 3, maxY: 5 };
 
@@ -38,40 +56,39 @@ describe(`${isValidPosition.name} correctly returns whether a position is valid`
 describe(`${runCommands.name} executes commands as expected`, () => {
   const plateau: Plateau = { maxX: 5, maxY: 5 };
 
-  it("moves north correctly", () => {
-    const rover = makeRover(1, 2, "N");
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual(makeRover(1, 3, "N"));
-  });
+  it.each([
+    ["N", makeRover(1, 2, "N"), makeRover(1, 3, "N")],
+    ["E", makeRover(1, 2, "E"), makeRover(2, 2, "E")],
+    ["S", makeRover(1, 2, "S"), makeRover(1, 1, "S")],
+    ["W", makeRover(1, 2, "W"), makeRover(0, 2, "W")],
+  ] as const)(
+    "moving %s results in correct position",
+    (_dir, startRover, expectedRover) => {
+      const result = runCommands(startRover, "M", plateau);
+      expect(result).toEqual(expectedRover);
+    }
+  );
 
-  it("moves east correctly", () => {
-    const rover = makeRover(1, 2, "E");
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual(makeRover(2, 2, "E"));
-  });
-
-  it("moves south correctly", () => {
-    const rover = makeRover(1, 2, "S");
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual(makeRover(1, 1, "S"));
-  });
-
-  it("moves west correctly", () => {
-    const rover = makeRover(1, 2, "W");
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual(makeRover(0, 2, "W"));
-  });
-
-  it("turns left correctly", () => {
-    const rover = makeRover(1, 2, "N");
+  it.each([
+    ["N", "W"],
+    ["W", "S"],
+    ["S", "E"],
+    ["E", "N"],
+  ] as const)("turnLeft: from %s -> %s", (startDir, expectedDir) => {
+    const rover = makeRover(0, 0, startDir);
     const result = runCommands(rover, "L", plateau);
-    expect(result.direction).toBe("W");
+    expect(result.direction).toBe(expectedDir);
   });
 
-  it("turns right correctly", () => {
-    const rover = makeRover(1, 2, "N");
+  it.each([
+    ["N", "E"],
+    ["E", "S"],
+    ["S", "W"],
+    ["W", "N"],
+  ] as const)("turnRight: from %s -> %s", (startDir, expectedDir) => {
+    const rover = makeRover(0, 0, startDir);
     const result = runCommands(rover, "R", plateau);
-    expect(result.direction).toBe("E");
+    expect(result.direction).toBe(expectedDir);
   });
 
   it("ignores moves that go out of bounds", () => {
@@ -96,17 +113,5 @@ describe(`${runCommands.name} executes commands as expected`, () => {
     const rover: Rover = { position: { x: 3, y: 3 }, direction: "E" };
     const result = runCommands(rover, "MMRMMRMRRM", plateau);
     expect(result).toEqual({ position: { x: 5, y: 1 }, direction: "E" });
-  });
-
-  it("should not move out of bounds north", () => {
-    const rover: Rover = { position: { x: 0, y: 5 }, direction: "N" };
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual({ position: { x: 0, y: 5 }, direction: "N" });
-  });
-
-  it("should not move out of bounds west", () => {
-    const rover: Rover = { position: { x: 0, y: 0 }, direction: "W" };
-    const result = runCommands(rover, "M", plateau);
-    expect(result).toEqual({ position: { x: 0, y: 0 }, direction: "W" });
   });
 });
